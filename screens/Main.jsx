@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, Platform, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { globalColors } from '../globalStyles';
@@ -6,9 +6,11 @@ import { auth, db } from '../utils/firebase';
 import { signOut } from 'firebase/auth';
 import { ref, onValue } from '@firebase/database';
 import emailjs from '@emailjs/browser';
+import {set} from "firebase/database";
 // Import animations
 import { FadeInTemp, FadeInHumid, FadeInSmoke } from '../components/FadeAnim';
-
+import EmptyCard from '../components/EmptyCard';
+import LineChartComp from '../components/LineChartComp';
 function Header({ logOut }) {
     const username = auth.currentUser.displayName;
 
@@ -57,20 +59,20 @@ function SmokeCard({ value = 0 }) {
     )
 }
 
-function EmptyCard() {
-    return (
-        <View style={emptyCard.container}>
-            <View style={emptyCard.iconContainer}>
-                <MaterialCommunityIcons name='fire-off' color='#dedede' size={40} />
-                <MaterialCommunityIcons name='water-off' color='#dedede' size={40} />
-                <MaterialCommunityIcons name='wifi-off' color='#dedede' size={40} />
-            </View>
-            <View style={emptyCard.textContainer}>
-                <Text style={emptyCard.text}>No data available. Please connect your sensors and try again.</Text>
-            </View>
-        </View>
-    )
-}
+// function EmptyCard() {
+//     return (
+//         <View style={emptyCard.container}>
+//             <View style={emptyCard.iconContainer}>
+//                 <MaterialCommunityIcons name='fire-off' color='#dedede' size={40} />
+//                 <MaterialCommunityIcons name='water-off' color='#dedede' size={40} />
+//                 <MaterialCommunityIcons name='wifi-off' color='#dedede' size={40} />
+//             </View>
+//             <View style={emptyCard.textContainer}>
+//                 <Text style={emptyCard.text}>No data available. Please connect your sensors and try again.</Text>
+//             </View>
+//         </View>
+//     )
+// }
 
 
 export default function Main({ navigation }) {
@@ -84,60 +86,73 @@ export default function Main({ navigation }) {
 
     // function send email
 const sendEmailTemp = (temperature) => {
-    emailjs.send('service_0oexdbn', 'template_n8kb5iz', 
-    { 
-        subject: "Alert temperature", 
-        to_name: userName, 
-        message: "Alert temperature: " + temperature, 
-        sender: "Fire alarm system", 
-        receiver: currentEmail 
-    });
+    // emailjs.send('service_0oexdbn', 'template_n8kb5iz', 
+    // { 
+    //     subject: "Alert temperature", 
+    //     to_name: userName, 
+    //     message: "Alert temperature: " + temperature, 
+    //     sender: "Fire alarm system", 
+    //     receiver: currentEmail 
+    // });
     console.log("Email sent!");
 }
-    const sendEmailHumi = (Humi) => {
-        emailjs.send('service_0oexdbn', 'template_n8kb5iz', { subject: "Alert humidity", status: "humidity", to_name: userName, status: "humidity", message: "Alert humidity: " + Humi, sender: "Fire alarm system", receiver: currentEmail }, 'vRpK3hlM2u0_-RXFR')
-        console.log("Email sent!");
-    }
-    const sendEmailSmoke = (Smoke) => {
-        emailjs.send('service_0oexdbn', 'template_n8kb5iz', { subject: "Alert smoke",status: "cacbon monoxide", to_name: userName, status: "cacbon monoxide", message: "Alert smoke: " + Smoke, sender: "Fire alarm system", receiver: currentEmail }, 'vRpK3hlM2u0_-RXFR')
-        console.log("Email sent!");
-    }
+const sendEmailHumi = (Humi) => {
+    // emailjs.send('service_0oexdbn', 'template_n8kb5iz', { subject: "Alert humidity", status: "humidity", to_name: userName, status: "humidity", message: "Alert humidity: " + Humi, sender: "Fire alarm system", receiver: currentEmail }, 'vRpK3hlM2u0_-RXFR')
+    console.log("Email sent!");
+}
+const sendEmailSmoke = (Smoke) => {
+    // emailjs.send('service_0oexdbn', 'template_n8kb5iz', { subject: "Alert smoke",status: "cacbon monoxide", to_name: userName, status: "cacbon monoxide", message: "Alert smoke: " + Smoke, sender: "Fire alarm system", receiver: currentEmail }, 'vRpK3hlM2u0_-RXFR')
+    console.log("Email sent!");
+}
+
+
 
     const fetchData = () => {
-        const tempRef = ref(db, userID + '/temperature');
-        const humidRef = ref(db, userID + '/humidity');
-        const smokeRef = ref(db, userID + '/smoke');
+        // Lấy userID của người dùng hiện tại
+        const userID = auth.currentUser.uid;
+        // Lấy productID từ cơ sở dữ liệu của người dùng
+        const userRef = ref(db, `User/${userID}`);
+        onValue(userRef, (snapshot) => {
+            const userData = snapshot.val();
+            if (userData && userData.productID) {
+                const productID = userData.productID;
+                console.log("Product ID:", productID);
+                // Tạo tham chiếu đến nút temp, humid và smoke
+                const tempRef = ref(db, `Product/${productID}/temperature`);
+                const humidRef = ref(db, `Product/${productID}/humidity`);
+                const smokeRef = ref(db, `Product/${productID}/co`);
 
-        onValue(tempRef, (snapshot) => {
-            const t = snapshot.val();
-            setTemp(t);
-            if (t >= 40) {
-                sendEmailTemp(t);
+                // Lấy dữ liệu cuối cùng từ các nút temp, humid và smoke
+                const getLastData = (ref, setData, threshold, emailFunction) => {
+                    onValue(ref, (snapshot) => {
+                        const data = snapshot.val();
+                        if (data) {
+                            const lastKey = Object.keys(data).pop();
+                            const lastValue = data[lastKey];
+                            setData(lastValue);
+                            if (lastValue >= threshold) {
+                                emailFunction(lastValue);
+                            }
+                        } else {
+                            console.log(`No data available for ${ref.path.toString()}`);
+                        }
+                    }, (error) => {
+                        console.error(`Error fetching data from ${ref.path.toString()}:`, error);
+                    });
+                };
+
+                // Lấy dữ liệu cuối cùng từ các nút và xử lý
+                getLastData(tempRef, setTemp, 40, sendEmailTemp);
+                getLastData(humidRef, setHumid, 20, sendEmailHumi);
+                getLastData(smokeRef, setSmoke, 60, sendEmailSmoke);
+            } else {
+                console.log("User data does not contain productID");
             }
         }, (error) => {
-            console.error("Error fetching data from Firebase:", error);
-        });
-
-        onValue(humidRef, (snapshot) => {
-            const h = snapshot.val();
-            setHumid(h);
-            if (h < 20 && h > 0) {
-                sendEmailHumi(h);
-            }
-        }, (error) => {
-            console.error("Error fetching data from Firebase:", error);
-        });
-
-        onValue(smokeRef, (snapshot) => {
-            const s = snapshot.val();
-            setSmoke(s);
-            if (s >= 60) {
-                sendEmailSmoke(s);
-            }
-        }, (error) => {
-            console.error("Error fetching data from Firebase:", error);
+            console.error("Error fetching user data from Firebase:", error);
         });
     };
+
 
     const getStatus = () => {
         if (temp < 40 && smoke < 40) {
@@ -168,6 +183,13 @@ const sendEmailTemp = (temperature) => {
         else status += "\nCarbon monoxide level is dangerously high!";
         return status;
     }
+
+    const addProductIDToUser = (productID) => {
+        const userRef = ref(db, `User/${userID}`);
+        set(userRef, { productID })
+            .then(() => console.log("Product ID added successfully"))
+            .catch((error) => console.error("Error adding product ID:", error));
+    };
 
     React.useEffect(() => {
         fetchData();
@@ -204,11 +226,14 @@ const sendEmailTemp = (temperature) => {
                             :
                             (
                                 <View style={{ height: '100%', justifyContent: 'center' }}>
-                                    <EmptyCard />
+                                    <EmptyCard addProductIDToUser={addProductIDToUser} />
                                 </View>
                             )
                     }
 
+                </View>
+                <View>
+                    <LineChartComp />
                 </View>
             </ScrollView>
         </ImageBackground>

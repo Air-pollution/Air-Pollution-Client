@@ -27,12 +27,16 @@ export default function Login({navigation}) {
 
     const handleLogin = (values) => {
         signInWithEmailAndPassword(auth, values.email, values.password)
-        .then(() => {
-            navigation.navigate('Dashboard');
-        })
-        .catch(() => {
-            setValid(false);
-        });
+            .then((userCredential) => {
+                // Get the user ID from the user credential
+                const userID = userCredential.user.uid;
+                // local.storage.setItem('userID', userID);
+                console.log(userID); // Log the user ID
+                navigation.navigate('Dashboard');
+            })
+            .catch(() => {
+                setValid(false);
+            });
     }
 
 
