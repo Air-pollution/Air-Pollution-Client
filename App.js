@@ -11,7 +11,7 @@ const Stack = createNativeStackNavigator();
 import Main from './screens/Main';
 import Login from './screens/Login';
 import Register from './screens/Register';
-
+import LineChartComp from './components/LineChartComp';
 export default function App() {
   return (
     <NavigationContainer>
@@ -30,5 +30,9 @@ export default function App() {
         />
       </Stack.Navigator>
     </NavigationContainer>
+
+    // <View>
+    //   <LineChartComp />
+    // </View>
   )
 }

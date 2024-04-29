@@ -10,6 +10,7 @@ import {set} from "firebase/database";
 // Import animations
 import { FadeInTemp, FadeInHumid, FadeInSmoke } from '../components/FadeAnim';
 import EmptyCard from '../components/EmptyCard';
+import LineChartComp from '../components/LineChartComp';
 function Header({ logOut }) {
     const username = auth.currentUser.displayName;
 
@@ -230,6 +231,9 @@ const sendEmailSmoke = (Smoke) => {
                             )
                     }
 
+                </View>
+                <View>
+                    <LineChartComp />
                 </View>
             </ScrollView>
         </ImageBackground>
