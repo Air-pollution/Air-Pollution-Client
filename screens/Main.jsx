@@ -8,7 +8,7 @@ import { ref, onValue } from '@firebase/database';
 import emailjs from '@emailjs/browser';
 import {set} from "firebase/database";
 // Import animations
-import { FadeInTemp, FadeInHumid, FadeInSmoke } from '../components/FadeAnim';
+import { FadeInTemp, FadeInHumid, FadeInSmoke, FadeInPressure } from '../components/FadeAnim';
 import EmptyCard from '../components/EmptyCard';
 import LineChartComp from '../components/LineChartComp';
 function Header({ logOut }) {
@@ -58,6 +58,14 @@ function SmokeCard({ value = 0 }) {
         </ImageBackground>
     )
 }
+function PressureCard({ value = 0 }) {
+    return (
+        <ImageBackground source={require('../assets/pressure.jpg')} style={styles.cardContainer} resizeMode='cover'>
+            <Text style={styles.title}>Pressure level</Text>
+            <Text style={styles.value}>{value} %</Text>
+        </ImageBackground>
+    )
+}
 
 // function EmptyCard() {
 //     return (
@@ -83,6 +91,7 @@ export default function Main({ navigation }) {
     const [temp, setTemp] = React.useState(0);
     const [humid, setHumid] = React.useState(0);
     const [smoke, setSmoke] = React.useState(0);
+    const [pressure, setPressure] = React.useState(0);
 
     // function send email
 const sendEmailTemp = (temperature) => {
@@ -108,21 +117,18 @@ const sendEmailSmoke = (Smoke) => {
 
 
     const fetchData = () => {
-        // Lấy userID của người dùng hiện tại
         const userID = auth.currentUser.uid;
-        // Lấy productID từ cơ sở dữ liệu của người dùng
         const userRef = ref(db, `User/${userID}`);
         onValue(userRef, (snapshot) => {
             const userData = snapshot.val();
             if (userData && userData.productID) {
                 const productID = userData.productID;
                 console.log("Product ID:", productID);
-                // Tạo tham chiếu đến nút temp, humid và smoke
                 const tempRef = ref(db, `Product/${productID}/temperature`);
                 const humidRef = ref(db, `Product/${productID}/humidity`);
                 const smokeRef = ref(db, `Product/${productID}/co`);
+                const pressureRef = ref(db, `Product/${productID}/pressure`);
 
-                // Lấy dữ liệu cuối cùng từ các nút temp, humid và smoke
                 const getLastData = (ref, setData, threshold, emailFunction) => {
                     onValue(ref, (snapshot) => {
                         const data = snapshot.val();
@@ -141,10 +147,10 @@ const sendEmailSmoke = (Smoke) => {
                     });
                 };
 
-                // Lấy dữ liệu cuối cùng từ các nút và xử lý
                 getLastData(tempRef, setTemp, 40, sendEmailTemp);
                 getLastData(humidRef, setHumid, 20, sendEmailHumi);
                 getLastData(smokeRef, setSmoke, 60, sendEmailSmoke);
+                getLastData(pressureRef, setPressure, 60, sendEmailSmoke);
             } else {
                 console.log("User data does not contain productID");
             }
@@ -219,6 +225,9 @@ const sendEmailSmoke = (Smoke) => {
                                     <FadeInSmoke>
                                         <SmokeCard value={smoke} />
                                     </FadeInSmoke>
+                                    <FadeInPressure>
+                                        <PressureCard value={pressure} />
+                                    </FadeInPressure>
 
                                 </View>
                             </View>
