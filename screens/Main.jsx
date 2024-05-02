@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, Platform, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, Platform, ScrollView, Modal } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { globalColors } from '../globalStyles';
 import { auth, db } from '../utils/firebase';
@@ -88,10 +88,12 @@ export default function Main({ navigation }) {
     const userName = auth.currentUser.displayName;
     const currentEmail = auth.currentUser.email;
 
-    const [temp, setTemp] = React.useState(0);
-    const [humid, setHumid] = React.useState(0);
-    const [smoke, setSmoke] = React.useState(0);
-    const [pressure, setPressure] = React.useState(0);
+    const [temp, setTemp] = useState(0);
+    const [humid, setHumid] = useState(0);
+    const [smoke, setSmoke] = useState(0);
+    const [pressure, setPressure] = useState(0);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [selectedSensor, setSelectedSensor] = useState('');
 
     // function send email
 const sendEmailTemp = (temperature) => {
@@ -124,6 +126,7 @@ const sendEmailSmoke = (Smoke) => {
             if (userData && userData.productID) {
                 const productID = userData.productID;
                 console.log("Product ID:", productID);
+                localStorage.setItem('ProductID', productID);
                 const tempRef = ref(db, `Product/${productID}/temperature`);
                 const humidRef = ref(db, `Product/${productID}/humidity`);
                 const smokeRef = ref(db, `Product/${productID}/co`);
@@ -200,7 +203,18 @@ const sendEmailSmoke = (Smoke) => {
     React.useEffect(() => {
         fetchData();
     }, []);
+    const [showChart, setShowChart] = useState(false);
 
+    // Hàm xử lý sự kiện khi ấn vào thẻ card
+    const handleCardPress = (sensor) => {
+        setSelectedSensor(sensor);
+        console.log("Selected sensor:", sensor)
+        setModalVisible(true);
+    };
+
+    const closeModal = () => {
+        setModalVisible(false);
+    };
     return (
         <ImageBackground style={styles.mainContainer} source={require('../assets/home_desktop.jpg')} resizeMode='cover'>
             <Header logOut={() => { navigation.navigate('Login') }} />
@@ -216,19 +230,34 @@ const sendEmailSmoke = (Smoke) => {
                                     {getSubtitle()}
                                 </Text>
                                 <View style={styles.valuesContainer}>
-                                    <FadeInTemp>
-                                        <TempCard value={temp} />
-                                    </FadeInTemp>
-                                    <FadeInHumid>
-                                        <HumidCard value={humid} />
-                                    </FadeInHumid>
-                                    <FadeInSmoke>
-                                        <SmokeCard value={smoke} />
-                                    </FadeInSmoke>
-                                    <FadeInPressure>
-                                        <PressureCard value={pressure} />
-                                    </FadeInPressure>
-
+                                    <TouchableOpacity onPress={() => handleCardPress('temperature')}>
+                                        <View style={styles.cardWrapper}>
+                                            <FadeInTemp>
+                                                <TempCard value={temp} />
+                                            </FadeInTemp>
+                                        </View>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => handleCardPress('humidity')}>
+                                        <View style={styles.cardWrapper}>
+                                            <FadeInHumid>
+                                                <HumidCard value={humid} />
+                                            </FadeInHumid>
+                                        </View>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => handleCardPress('co')}>
+                                        <View style={styles.cardWrapper}>
+                                            <FadeInSmoke>
+                                                <SmokeCard value={smoke} />
+                                            </FadeInSmoke>
+                                        </View>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => handleCardPress('pressure')}>
+                                        <View style={styles.cardWrapper}>
+                                            <FadeInPressure>
+                                                <PressureCard value={pressure} />
+                                            </FadeInPressure>
+                                        </View>
+                                    </TouchableOpacity>
                                 </View>
                             </View>
                         )
@@ -239,13 +268,25 @@ const sendEmailSmoke = (Smoke) => {
                                 </View>
                             )
                     }
-
-                </View>
-                <View>
-                    <LineChartComp />
                 </View>
             </ScrollView>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={closeModal}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <LineChartComp sensor={selectedSensor} />
+                        <TouchableOpacity onPress={closeModal}>
+                            <Text style={styles.closeButton}>X</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </ImageBackground>
+
     );
 }
 
@@ -273,10 +314,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     valuesContainer: {
-        alignItems: 'center',
-        flexDirection: Platform.OS === 'web' ? 'row' : 'column',
-        marginTop: Platform.OS === 'web' ? 40 : 0,
-        justifyContent: 'space-evenly',
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        flexWrap: 'wrap',
+    },
+    cardWrapper: {
+        width: '45%', // Đảm bảo phần tử con không bị tràn ra khỏi màn hình
+        margin: 5, // Khoảng cách giữa các thẻ
     },
     cardContainer: {
         width: Platform.OS === 'web' ? 350 : 250,
