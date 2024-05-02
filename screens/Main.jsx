@@ -11,6 +11,7 @@ import {set} from "firebase/database";
 import { FadeInTemp, FadeInHumid, FadeInSmoke, FadeInPressure } from '../components/FadeAnim';
 import EmptyCard from '../components/EmptyCard';
 import LineChartComp from '../components/LineChartComp';
+import Navbar from '../components/NavBar';
 function Header({ logOut }) {
     const username = auth.currentUser.displayName;
 
@@ -217,6 +218,7 @@ const sendEmailSmoke = (Smoke) => {
     };
     return (
         <ImageBackground style={styles.mainContainer} source={require('../assets/home_desktop.jpg')} resizeMode='cover'>
+            <Navbar />
             <Header logOut={() => { navigation.navigate('Login') }} />
             <ScrollView style={{ marginTop: 0 }}>
                 <View style={styles.bodyContainer}>
@@ -278,19 +280,43 @@ const sendEmailSmoke = (Smoke) => {
             >
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
-                        <LineChartComp sensor={selectedSensor} />
+                        <View style={styles.chartContainer}>
+                            <LineChartComp sensor={selectedSensor} />
+                        </View>
                         <TouchableOpacity onPress={closeModal}>
                             <Text style={styles.closeButton}>X</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
             </Modal>
+
+
         </ImageBackground>
 
     );
 }
 
 const styles = StyleSheet.create({
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Màu nền mờ khi modal hiển thị
+    },
+    modalContent: {
+        width: '80%',
+        backgroundColor: '#FFFFFF',
+        borderRadius: 16,
+        padding: 20,
+    },
+    chartContainer: {
+        alignItems: 'center', // Canh chỉnh biểu đồ ở giữa theo chiều ngang
+        marginTop: 20, // Khoảng cách giữa biểu đồ và nút đóng modal
+    },
+    closeButton: {
+        alignSelf: 'flex-end', // Canh chỉnh nút đóng modal sang phải
+        marginTop: 10, // Khoảng cách giữa nút đóng và biểu đồ
+    },
     dashboardTitle: {
         fontSize: Platform.OS === 'web' ? 30 : 24,
         fontWeight: 'bold',
