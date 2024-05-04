@@ -1,32 +1,49 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
-
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import { Table, Row, Rows } from 'react-native-table-component';
-const tableData = {
-    tableHead: ['Crypto Name', 'Value', 'Mkt Cap'],
-    tableData: [
-        ['Bitcoin', '$44,331', '$839,702,328,904'],
-        ['Ethereum', '$3000.9', '$359,080,563,225'],
-        ['Tether', '$1', '$79,470,820,738'],
-        ['BNB', '$413.44', '$69,446,144,361'],
-        ['USD Coin', '$1', '$53,633,260,549'],
-    ],
-};
+import { onValue, ref } from '@firebase/database';
+import { db } from '../utils/firebase';
+
 const TableCustom = () => {
-    const [data, setData] = useState(tableData);
+    const [tableData, setTableData] = useState({ tableHead: ['ProductID', 'Status', 'Last Updated'], tableData: [] });
+
+    const userID = localStorage.getItem('userID');
+    const productID = localStorage.getItem('ProductID');
+    useEffect(() => {
+        const fetchData = () => {
+            const userRef = ref(db, `User/${userID}`);
+            onValue(userRef, (snapshot) => {
+                const userData = snapshot.val();
+                if (userData) {
+                    const tableRows = [[productID, 'Online', '12/05/2024']]; // Hard code 'Online' and '12/05/2024'
+                    setTableData(prevState => ({ ...prevState, tableData: tableRows }));
+                }
+            });
+        };
+
+        fetchData();
+
+        return () => {
+            // Clean up
+        };
+    }, []);
+
     return (
         <View style={styles.container}>
-            <Table borderStyle={{ borderWidth: 4, borderColor: 'teal' }}>
-                <Row data={data.tableHead} style={styles.head} textStyle={styles.headText} />
-                <Rows data={data.tableData} textStyle={styles.text} />
+            <Table style={styles.table} borderStyle={{ borderWidth: 1, borderColor: '#ccc' }}>
+                <Row data={tableData.tableHead} style={styles.head} textStyle={styles.headText} />
+                <Rows data={tableData.tableData} textStyle={styles.text} />
             </Table>
         </View>
-    )
+    );
 }
+
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 10, justifyContent: 'center', backgroundColor: '#fff' },
-    head: { height: 44, backgroundColor: 'darkblue' },
-    headText: { fontSize: 20, fontWeight: 'bold' , textAlign: 'center', color: 'white' },
-    text: { margin: 6, fontSize: 16, fontWeight: 'bold' , textAlign: 'center' },
-})
-export default TableCustom
+    container: { flex: 1, padding: 16, paddingTop: 30, backgroundColor: '#fff' },
+    table: { width: '100%' },
+    head: { height: 40, backgroundColor: '#f1f8ff' },
+    headText: { fontWeight: 'bold', textAlign: 'center', fontSize: 16 },
+    text: { textAlign: 'center', fontSize: 14 },
+});
+
+export default TableCustom;
