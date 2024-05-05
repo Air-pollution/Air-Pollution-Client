@@ -24,7 +24,9 @@ export const Navbar = () => {
             )}
             <View style={styles.menuContainer}>
                 <View style={styles.header}>
-                    <Text style={styles.title}>Website</Text>
+                    <TouchableOpacity onPress={() => navigation.navigate("Dashboard")}>
+                        <Text style={styles.title}>Website</Text>
+                    </TouchableOpacity>
                     {isMobile && ( // Hiển thị biểu tượng menu cho thiết bị di động
                         <TouchableOpacity style={styles.menuIcon} onPress={handleMenuToggle}>
                             <View style={styles.menuBar} />

@@ -20,7 +20,7 @@ export default function EmptyCard({ addProductIDToUser }) {
                 <MaterialCommunityIcons name='wifi-off' color='#dedede' size={40} />
             </View>
             <View style={styles.textContainer}>
-                <Text style={styles.text}>No data available. Please connect your sensors and try again.</Text>
+                <Text style={styles.textA}>No data available. Please connect your sensors and try again.</Text>
             </View>
             <View style={styles.inputContainer}>
                 <TextInput
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'center',
     },
-    text: {
+    textA: {
         fontSize: 18,
         textAlign: 'center',
     },

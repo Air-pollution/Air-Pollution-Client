@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { View, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
@@ -11,8 +10,6 @@ const Stack = createNativeStackNavigator();
 import Main from './screens/Main';
 import Login from './screens/Login';
 import Register from './screens/Register';
-import LineChartComp from './components/LineChartComp'; 
-import TableCustom from './components/TableCustom';
 import LineChartRechart from './components/LineChartRechart';
 import Equipment from './screens/Equipment';
 export default function App() {
@@ -44,9 +41,5 @@ export default function App() {
       </Stack.Navigator>
     </NavigationContainer>
 
-    // <View>
-    //   <LineChartRechart />
-    //   {/* <TableCustom /> */}
-    // </View>
   )
 }

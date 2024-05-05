@@ -39,7 +39,7 @@ export const globalStyles = StyleSheet.create({
         flex: 1,
         marginHorizontal: 5,
         paddingLeft: 5,
-        outlineStyle: 'none',
+        // outlineStyle: 'none',
     },
     submitBtn: {
         marginTop: 20,

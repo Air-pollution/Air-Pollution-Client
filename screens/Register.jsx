@@ -10,6 +10,8 @@ import * as yup from 'yup';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 
+
+
 const SignUpSchema = yup.object({
     username: yup.string()
     .label('Username')

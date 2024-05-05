@@ -280,12 +280,12 @@ const sendEmailSmoke = (Smoke) => {
             >
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
-                        <View style={styles.chartContainer}>
-                            <LineChartComp sensor={selectedSensor} />
-                        </View>
                         <TouchableOpacity onPress={closeModal}>
                             <Text style={styles.closeButton}>X</Text>
                         </TouchableOpacity>
+                        <View style={styles.chartContainer}>
+                            <LineChartComp sensor={selectedSensor} />
+                        </View>
                     </View>
                 </View>
             </Modal>
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
     },
     modalContent: {
         width: '80%',
-        backgroundColor: '#FFFFFF',
+        // backgroundColor: '#FFFFFF',
         borderRadius: 16,
         padding: 20,
     },
@@ -315,7 +315,8 @@ const styles = StyleSheet.create({
     },
     closeButton: {
         alignSelf: 'flex-end', // Canh chỉnh nút đóng modal sang phải
-        marginTop: 10, // Khoảng cách giữa nút đóng và biểu đồ
+        marginTop: -10, // Khoảng cách giữa nút đóng và biểu đồ
+        fontWeight: 'bold',
     },
     dashboardTitle: {
         fontSize: Platform.OS === 'web' ? 30 : 24,

@@ -1,11 +1,9 @@
-// Import các dependencies cần thiết
 import React, { useEffect, useState } from 'react';
 import { View, Text, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { ref, onValue } from '@firebase/database';
 import { db } from '../utils/firebase';
 
-// Component biểu đồ đường
 const LineChartComp = ({ sensor }) => {
     const [sensorData, setSensorData] = useState([]);
     const ProductID = localStorage.getItem('ProductID');
@@ -60,8 +58,8 @@ const LineChartComp = ({ sensor }) => {
                         },
                     ],
                 }}
-                width={Dimensions.get('window').width}
-                height={220}
+                width={Dimensions.get('window').width * 0.8}
+                height={Dimensions.get('window').height * 0.5}
                 yAxisLabel={sensor}
                 yAxisInterval={1}
                 chartConfig={{

@@ -31,8 +31,9 @@ export default function Login({navigation}) {
                 // Get the user ID from the user credential
                 const userID = userCredential.user.uid;
                 // local.storage.setItem('userID', userID);
-                console.log(userID); // Log the user ID
+                // console.log(userID); // Log the user ID
                 navigation.navigate('Dashboard');
+                localStorage.setItem('userID', userID);
             })
             .catch(() => {
                 setValid(false);
