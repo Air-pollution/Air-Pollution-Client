@@ -109,54 +109,6 @@ const LineChartRechart = () => {
         { name: '9', temperature: 17, humidity: 50 ,pressure: 1010, co: 300 },
         { name: '10', temperature: 16, humidity: 50 ,pressure: 1010, co: 300 },
     ]);
-    const [data, setData] = useState([
-        { name: '1', temperature: 25 },
-        { name: '2', temperature: 24 },
-        { name: '3', temperature: 23 },
-        { name: '4', temperature: 22 },
-        { name: '5', temperature: 21 }
-        { name: '6', temperature: 20 },
-        { name: '7', temperature: 19 },
-        { name: '8', temperature: 18 },
-        { name: '9', temperature: 17 },
-        { name: '10', temperature: 16 },
-    ]);
-    const [dataHumid, setDataHumid] = useState([
-        { name: '1', humidity: 50 },
-        { name: '2', humidity: 51 },
-        { name: '3', humidity: 52 },
-        { name: '4', humidity: 53 },
-        { name: '5', humidity: 54 },
-        { name: '6', humidity: 55 },
-        { name: '7', humidity: 56 },
-        { name: '8', humidity: 57 },
-        { name: '9', humidity: 58 },
-        { name: '10', humidity: 59 },
-    ]);
-    const [dataPressure, setDataPressure] = useState([
-        { name: '1', pressure: 1010 },
-        { name: '2', pressure: 1009 },
-        { name: '3', pressure: 1008 },
-        { name: '4', pressure: 1007 },
-        { name: '5', pressure: 1006 },
-        { name: '6', pressure: 1005 },
-        { name: '7', pressure: 1004 },
-        { name: '8', pressure: 1003 },
-        { name: '9', pressure: 1002 },
-        { name: '10', pressure: 1001 },
-    ]);
-    const [dataCo, setDataCo] = useState([
-        { name: '1', co: 300 },
-        { name: '2', co: 310 },
-        { name: '3', co: 320 },
-        { name: '4', co: 330 },
-        { name: '5', co: 340 },
-        { name: '6', co: 350 },
-        { name: '7', co: 360 },
-        { name: '8', co: 370 },
-        { name: '9', co: 380 },
-        { name: '10', co: 390 },
-    ]);
 
     return (
         <ImageBackground source={require('../assets/home_desktop.jpg')} resizeMode='cover' style={styles.imageBackground}>
@@ -169,9 +121,9 @@ const LineChartRechart = () => {
                         <Tooltip />
                         <CartesianGrid stroke="#f5f5f5" />
                         <Line  type="monotone" dataKey="temperature" stroke="#e26a00" yAxisId={0} />
-                        <Line  type="monotone" dataKey="humidity" stroke="#e26a00" yAxisId={0} />
-                        <Line  type="monotone" dataKey="pressure" stroke="#e26a00" yAxisId={0} />
-                        <Line  type="monotone" dataKey="co" stroke="#e26a00" yAxisId={0} />
+                        <Line type="monotone" dataKey="humidity" stroke="#1E88E5" yAxisId={0} />
+                        <Line type="monotone" dataKey="pressure" stroke="#FF5722" yAxisId={0} />
+                        <Line type="monotone" dataKey="co" stroke="#78909C" yAxisId={0} />
 
 
                     </LineChart>

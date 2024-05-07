@@ -25,7 +25,7 @@ function Header({ logOut }) {
     return (
         <View style={styles.header}>
             <Text style={styles.dashboardTitle}>
-                {username}'s Home sensors
+                {username}'s Equipment
             </Text>
             <TouchableOpacity onPress={handleSignOut}>
                 <MaterialCommunityIcons name='exit-to-app' size={30} />
@@ -95,27 +95,26 @@ export default function Main({ navigation }) {
     const [pressure, setPressure] = useState(0);
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedSensor, setSelectedSensor] = useState('');
-
+    const [predictedClass, setPredictedClass] = useState(0);
     // function send email
 const sendEmailTemp = (temperature) => {
-    // emailjs.send('service_0oexdbn', 'template_n8kb5iz', 
-    // { 
-    //     subject: "Alert temperature", 
-    //     to_name: userName, 
-    //     message: "Alert temperature: " + temperature, 
-    //     sender: "Fire alarm system", 
-    //     receiver: currentEmail 
-    // });
+    emailjs.send('service_0oexdbn', 'template_n8kb5iz', { subject: "Alert temperature", status: "temperature", to_name: userName, status: "temperature", message: "Alert temperature: " + temperature, sender: "Air Pollution Monitoring System", receiver: currentEmail }, 'vRpK3hlM2u0_-RXFR')
     console.log("Email sent!");
 }
 const sendEmailHumi = (Humi) => {
-    // emailjs.send('service_0oexdbn', 'template_n8kb5iz', { subject: "Alert humidity", status: "humidity", to_name: userName, status: "humidity", message: "Alert humidity: " + Humi, sender: "Fire alarm system", receiver: currentEmail }, 'vRpK3hlM2u0_-RXFR')
+    emailjs.send('service_0oexdbn', 'template_n8kb5iz', { subject: "Alert humidity", status: "humidity", to_name: userName, status: "humidity", message: "Alert humidity: " + Humi, sender: "Air Pollution Monitoring System", receiver: currentEmail }, 'vRpK3hlM2u0_-RXFR')
     console.log("Email sent!");
 }
 const sendEmailSmoke = (Smoke) => {
-    // emailjs.send('service_0oexdbn', 'template_n8kb5iz', { subject: "Alert smoke",status: "cacbon monoxide", to_name: userName, status: "cacbon monoxide", message: "Alert smoke: " + Smoke, sender: "Fire alarm system", receiver: currentEmail }, 'vRpK3hlM2u0_-RXFR')
+    emailjs.send('service_0oexdbn', 'template_n8kb5iz', { subject: "Alert smoke",status: "cacbon monoxide", to_name: userName, status: "cacbon monoxide", message: "Alert smoke: " + Smoke, sender: "Air Pollution Monitoring System", receiver: currentEmail }, 'vRpK3hlM2u0_-RXFR')
     console.log("Email sent!");
-}
+    }
+    
+    const sendEmailPressure = (Pressure) => {
+        emailjs.send('service_0oexdbn', 'template_n8kb5iz', { subject: "Alert pressure", status: "air pressure", to_name: userName, status: "air pressure", message: "Alert pressure: " + Pressure, sender: "Air Pollution Monitoring System", receiver: currentEmail }, 'vRpK3hlM2u0_-RXFR')
+        console.log("Email sent!");
+    }
+
 
 
 
@@ -132,7 +131,7 @@ const sendEmailSmoke = (Smoke) => {
                 const humidRef = ref(db, `Product/${productID}/humidity`);
                 const smokeRef = ref(db, `Product/${productID}/co`);
                 const pressureRef = ref(db, `Product/${productID}/pressure`);
-
+                const predictedClassRef = ref(db, `Product/${productID}/predictedClass`);
                 const getLastData = (ref, setData, threshold, emailFunction) => {
                     onValue(ref, (snapshot) => {
                         const data = snapshot.val();
@@ -151,10 +150,11 @@ const sendEmailSmoke = (Smoke) => {
                     });
                 };
 
-                getLastData(tempRef, setTemp, 40, sendEmailTemp);
-                getLastData(humidRef, setHumid, 20, sendEmailHumi);
-                getLastData(smokeRef, setSmoke, 60, sendEmailSmoke);
-                getLastData(pressureRef, setPressure, 60, sendEmailSmoke);
+                getLastData(tempRef, setTemp, 35, sendEmailTemp);
+                getLastData(humidRef, setHumid, 80, sendEmailHumi);
+                getLastData(smokeRef, setSmoke, 35, sendEmailSmoke);
+                getLastData(pressureRef, setPressure, 1020, sendEmailPressure);
+                getLastData(predictedClassRef, setPredictedClass, 80, sendEmailHumi);
             } else {
                 console.log("User data does not contain productID");
             }
@@ -165,32 +165,81 @@ const sendEmailSmoke = (Smoke) => {
 
 
     const getStatus = () => {
-        if (temp < 40 && smoke < 40) {
+        console.log("temp", temp);
+        console.log("predict: ", predictedClass);
+        if ( temp <= 25 && temp >= 20 && humid >= 40 && humid <= 60 && pressure >= 1010 && pressure <= 1015 && smoke <= 9 ) {
             return <Text style={[styles.status, { color: 'green' }]}> Safe</Text>;
         }
-        else if (temp < 45 && smoke < 50) {
-            return <Text style={[styles.status, { color: 'orange' }]}> Unsafe</Text>;
+        else if (temp >= 35 || humid <= 30 || smoke > 35 || pressure < 1000 || pressure > 1020) {
+            return <Text style={[styles.status, { color: 'red' }]}> Critical</Text>;
         }
-        else return <Text style={[styles.status, { color: 'red' }]}> Critical</Text>;
+        else return <Text style={[styles.status, { color: 'orange' }]}> Warning</Text>;
+
+        
+    }
+    const getPredict = () => {
+        switch (predictedClass) {
+            case 0:
+                return <Text style={[styles.status, { color: 'green' }]}> Clear</Text>;
+            case 1:
+                return <Text style={[styles.status, { color: 'orange' }]}> Sunny</Text>;
+            case 2:
+                return <Text style={[styles.status, { color: 'blue' }]}> Mist</Text>;
+            case 3:
+                return <Text style={[styles.status, { color: 'grey' }]}> Light drizzle</Text>;
+            case 4:
+                return <Text style={[styles.status, { color: 'light blue' }]}> Light rain</Text>;
+            case 5:
+                return <Text style={[styles.status, { color: 'dark' }]}> Overcast</Text>;
+            case 6:
+                return <Text style={[styles.status, { color: '#104491' }]}> Cloudy</Text>;
+            case 7:
+                return <Text style={[styles.status, { color: '#98B5C7' }]}> Party Cloudy</Text>;
+            case 8:
+                return <Text style={[styles.status, { color: '#28292A' }]}> Patchy Light drizzle</Text>;
+            case 9:
+                return <Text style={[styles.status, { color: '#B6A6A6' }]}> Fog</Text>;
+            case 10:
+                return <Text style={[styles.status, { color: '#4F4F4F' }]}> Moderate rain</Text>;
+            case 11:
+                return <Text style={[styles.status, { color: '#87CEEB' }]}> Patchy Rain Possible</Text>;
+            default:
+        }
     }
 
     const getSubtitle = () => {
         let status = "";
-        if (temp < 40) {
-            status += "Your house's temperature is normal.";
+        if (temp < 25 && temp > 20) {
+            status += "Temperature is normal.";
         }
-        else if (temp < 45) {
-            status += "Your house's temperature is high.";
+        else if (temp > 35) {
+            status += "Temperature is dangerous.";
         }
-        else status += "Your house's temperature is dangerously high!";
-
-        if (smoke < 40) {
+        else status += "Temperature is warning";
+        //humid
+        if (humid < 60 && humid > 40) {
+            status += "\nHumidity is at a safe level.";
+        }
+        else if (humid < 30) {
+            status += "\nHumidity level is dangerous.";
+        }
+        else status += "\nHumidity level is warning.";
+        //pressure
+        if (pressure < 1015 && pressure > 1010) {
+            status += "\nPressure is at a safe level.";
+        }
+        else if (pressure > 1020) {
+            status += "\nPressure level is dangerous.";
+        }
+        else status += "\nPressure level is warning.";
+        //smoke
+        if (smoke < 9) {
             status += "\nCarbon monoxide is at a safe level.";
         }
-        else if (smoke < 50) {
+        else if (smoke > 35) {
             status += "\nCarbon monoxide level is high.";
         }
-        else status += "\nCarbon monoxide level is dangerously high!";
+        else status += "\nCarbon monoxide level is warning.";
         return status;
     }
 
@@ -227,6 +276,9 @@ const sendEmailSmoke = (Smoke) => {
                             <View style={{ alignItems: 'center' }}>
                                 <Text style={styles.status}>
                                     Status: {getStatus()}
+                                </Text>
+                                <Text style={styles.status}>
+                                    Predict: {getPredict()}
                                 </Text>
                                 <Text style={styles.statusSub}>
                                     {getSubtitle()}
